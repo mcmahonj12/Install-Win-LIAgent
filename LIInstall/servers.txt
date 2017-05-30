@@ -1,0 +1,6 @@
+sql-01a.corp.local
+sql-01b.corp.local
+sso-01a.corp.local
+sso-01b.corp.local
+vcs-01a.corp.local
+vcs-01b.corp.local
