@@ -39,6 +39,10 @@ Param(
 <#Example usage PS C:\scripts> .\test.ps1 -Name (Get-Content "C:\Scripts\hosts.csv") -SourceInstall "C:\scripts" -LIFQDN "log-01a.corp.l
 ocal" -LISSL $true#>
 
+<# *************************************************************************
+    Begin Functions
+   *************************************************************************#>
+
 # *************************************************************************
 # Install the new Log Insight Agent and set its configuration.
 function Install-LIagent {
@@ -127,9 +131,38 @@ function Get-JobStatus {
     } Until (($Jobs | Where State -eq "Running").Count -eq 0)
 }
 
+# *************************************************************************
+# Checks to ensure the installer file exists and can be opened by the logged in user.
+# An error will be displayed on screen should the file not exist or the appropriate permissions are not available and the script will exit.
+function Check-File {
+    param($x)
+    
+    try
+    {
+        [io.file]::OpenRead($x).close()
+    }
+
+    catch [System.Management.Automation.MethodInvocationException]
+    {
+        Write-Warning "Could not find the file specified. Please specify the correct path to the MSI. `nThe script will now exit."
+        Exit
+    }
+    catch [System.UnauthorizedAccessException]
+    {
+        Write-Warning "The username running the script does not have READ access to the installer file $x. `nPlease check the user permissions and try again. `nThe script will now exit."
+        Exit
+    }
+}
+<# *************************************************************************
+    End Functions
+   *************************************************************************#>
+
+
 <# *************************************************************************
     Main script body
    *************************************************************************#>
+
+Check-File $SourceInstallFile  # Checks to ensure we have access to the installer. No need to continue if not.
 
 # Set some additional paramaters for the script.
 $localLogLoc  = "liagent_install.log" # Location of the installation log file on the remote server.
